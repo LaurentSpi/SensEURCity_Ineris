@@ -4,7 +4,7 @@ These scripts correspond to the methodology described in Wesseling et al., 2024.
 
 02_data_cleaning.R => this script allows to clean the sensor dataset: 
 1)eliminate negative values
-2)eliminate values > threshold value based on max reference station value
+2)eliminate values > threshold value based on max reference station value (to be changed if necessary)
 3)identify frozen values for more than 3 hours
 4)eliminate sensors with positive constante bias
 5)clean data are saved in OUTPUTS dir
@@ -39,6 +39,6 @@ These scripts correspond to the methodology described in Wesseling et al., 2024.
 07_uncertainty_calc.R => this script allow to calculate sensor data uncertainties
 This is adapted from the European equivalence demonstration guide for the use of sensor systems in ambient air environments:
 1)a random noise associated to the sensors can be calculated (sensor-specific, to be adapted?)
-2)a between sensor uncetainty is calculated (i.e. reproducibility between different replicas of the sensor)
+2)a between sensor uncertainty is calculated (i.e. reproducibility between different replicas of the sensor)
 3)a field uncetainty is calculated (incorporating the effects of parameters influencing the variability of the sensor system's response)
  
