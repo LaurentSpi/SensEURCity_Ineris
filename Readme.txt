@@ -17,7 +17,7 @@ These scripts correspond to the methodology described in Wesseling et al., 2024.
 5)groups of sensor data are created based on the type, the clusters, the seasons (possible to add time of the day)
 6)sensor data with groups are saved in OUTPUTS dir
 
-04_outliers_detection_v2.R => this script allow the outliers detection for each group of sensor data (add reference)
+04_outliers_detection_v2.R => this script allows the outliers detection for each group of sensor data (add reference)
 1)a square root transformation of the sensor data is applied
 2)mean and standard deviation of the log-transformed distribution of the sensor data are calculated removing the ith observation
 3)an optimization of the log likelihood function is performed to find the mean and standard deviation of the underlying normal distribution
