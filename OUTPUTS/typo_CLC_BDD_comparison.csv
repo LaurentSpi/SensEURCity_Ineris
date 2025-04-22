@@ -1,0 +1,32 @@
+Location.ID,Typology.sEURcity,Typology.CLC
+ANT_REF_AL01,INDUS,Regional background
+ANT_REF_M802,INDUS,Regional background
+ANT_REF_R801,URB,Regional background
+ANT_REF_R802,TRA,Traffic
+ANT_REF_R803,URB,Regional background
+ANT_REF_R804,TRA,Regional background
+ANT_REF_R805,TRA,Urban background
+ANT_REF_R811,URB,Regional background
+ANT_REF_R817,URB,Regional background
+ANT_TRA_AMER,TRA,Urban background
+ANT_TRA_DESG,TRA,Industrial Setting
+ANT_TRA_GROT,TRA,Regional background
+ANT_TRA_HALE,TRA,Regional background
+ANT_TRA_HAVE,TRA,Regional background
+ANT_TRA_LEOP,TRA,Urban background
+ANT_TRA_POTH,TRA,Urban background
+ANT_TRA_SING,TRA,Urban background
+ANT_URB_ANDR,URB,Urban background
+ANT_URB_BEGI,URB,Regional background
+ANT_URB_BOEL,URB,Regional background
+ANT_URB_BRED,URB,Regional background
+ANT_URB_GROT,URB,Regional background
+ANT_URB_KIPD,URB,Urban background
+ANT_URB_LANG,URB,Urban background
+ANT_URB_MAER,URB,Regional background
+ANT_URB_PARK,URB,Urban background
+ANT_URB_PEST,URB,Regional background
+ANT_URB_TURK,URB,Regional background
+ANT_URB_VINC,URB,Urban background
+ANT_URB_WAPP,URB,Urban background
+ANT_URB_WITT,URB,Industrial Setting

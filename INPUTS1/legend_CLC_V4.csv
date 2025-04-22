@@ -1,0 +1,46 @@
+﻿v1;v2;v3;v4;v5;v6;type;type2
+1;111;230;0;77;255;Continuous urban fabric;Traffic
+2;112;255;0;0;255;Discontinuous urban fabric;Urban background
+3;121;204;77;242;255;Industrial or commercial units;Industrial Setting
+4;122;204;0;0;255;Road and rail networks and associated land;Traffic
+5;123;230;204;204;255;Port areas;Traffic
+6;124;230;204;230;255;Airports;Traffic
+7;131;166;0;204;255;Mineral extraction sites;Industrial Setting
+8;132;166;77;0;255;Dump sites;Industrial Setting
+9;133;255;77;255;255;Construction sites;Industrial Setting
+10;141;255;166;255;255;Green urban areas;Urban background
+11;142;255;230;255;255;Sport and leisure facilities;Urban background
+12;211;255;255;168;255;Non-irrigated arable land;Regional background
+13;212;255;255;0;255;Permanently irrigated land;Regional background
+14;213;230;230;0;255;Rice fields;Regional background
+15;221;230;128;0;255;Vineyards;Regional background
+16;222;242;166;77;255;Fruit trees and berry plantations;Regional background
+17;223;230;166;0;255;Olive groves;Regional background
+18;231;230;230;77;255;Pastures;Regional background
+19;241;255;230;166;255;Annual crops associated with permanent crops;Regional background
+20;242;255;230;77;255;Complex cultivation patterns;Regional background
+21;243;230;204;77;255;Land principally occupied by agriculture with significant areas of natural vegetation;Regional background
+22;244;242;204;166;255;Agro-forestry areas;Regional background
+23;311;128;255;0;255;Broad-leaved forest;Regional background
+24;312;0;166;0;255;Coniferous forest;Regional background
+25;313;77;255;0;255;Mixed forest;Regional background
+26;321;204;242;77;255;Natural grasslands;Regional background
+27;322;166;255;128;255;Moors and heathland;Regional background
+28;323;166;230;77;255;Sclerophyllous vegetation;Regional background
+29;324;166;242;0;255;Transitional woodland-shrub;Regional background
+30;331;230;230;230;255;Beaches dunes sands;Regional background
+31;332;204;204;204;255;Bare rocks;Regional background
+32;333;204;255;204;255;Sparsely vegetated areas;Regional background
+33;334;0;0;0;255;Burnt areas;Regional background
+34;335;166;230;204;255;Glaciers and perpetual snow;Regional background
+35;411;166;166;255;255;Inland marshes;Regional background
+36;412;77;77;255;255;Peat bogs;Regional background
+37;421;204;204;255;255;Salt marshes;Regional background
+38;422;230;230;255;255;Salines;Regional background
+39;423;166;166;230;255;Intertidal flats;Regional background
+40;511;0;204;242;255;Water courses;Regional background
+41;512;128;242;230;255;Water bodies;Regional background
+42;521;0;255;166;255;Coastal lagoons;Regional background
+43;522;166;255;230;255;Estuaries;Regional background
+44;523;230;242;255;255;Sea and ocean;Regional background
+48;999;255;255;255;255;NODATA;NA
