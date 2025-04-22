@@ -5,3 +5,6 @@ INPUTS1/ref_df_all.xlsx
 INPUTS1/LCS_df_all.xlsx
 OUTPUTS/outliers_calibrationFactors_nBootStrap_100_alltime_nmax1000_distmaxRepmax_outliers.xlsx
 OUTPUTS/typo_CLC_BDD_comparison.xlsx
+OUTPUTS/typo_CLC_BDD_comparison.csv
+OUTPUTS/outliers_calibrationFactors_nBootStrap_100_alltime_nmax1000_distmaxRepmax_outliers.csv
+INPUTS1/ref_df_all.csv
