@@ -218,9 +218,6 @@ Si vous rencontrez des erreurs liées aux chemins de fichiers :
 2. Assurez-vous que tous les scripts utilisent le fichier de configuration pour leurs chemins
 3. Vérifiez que la structure de répertoires correspond à celle attendue
 
-### Fichiers manquants
-Les scripts externes (`SensorIneris_Toolbox.R`, `uBss and uCi.R`, `interpolate.R`) sont demandés via des fenêtres de dialogue. Assurez-vous de les avoir disponibles lorsque vous exécutez les scripts qui en ont besoin.
-
 ### Erreurs de packages
 Si vous rencontrez des erreurs liées aux packages R :
 ```r
@@ -228,7 +225,7 @@ install.packages("nom_du_package_manquant")
 ```
 
 ### Données insuffisantes
-Les scripts supposent une certaine densité de données. Si vous avez peu de capteurs ou de stations de référence, certaines fonctionnalités (comme l'interpolation spatiale) pourraient ne pas fonctionner correctement.
+Les scripts supposent une certaine densité de données. Si vous avez peu de capteurs ou de stations de référence, certaines fonctionnalités (comme l'interpolation spatiale) pourraient ne pas fonctionner correctement. Prévoyez dans ce cas de petits ajustements au niveau de votre jeu de données.
 
 ## Références
 
