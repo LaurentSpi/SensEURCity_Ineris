@@ -26,16 +26,6 @@ library(chron)
 shapefile <- st_read(file_shapefile_belgium)
 st_crs(shapefile) <- "EPSG:4326"
 
-# Directory paths
-# indir   <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/"# path for input directory
-# outdir  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/"# path for output directory
-# outdir2  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/"# path for output directory
-# outdir3 <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/outliers_detection"
-
-# Init variables
-loc <-"Antwerp" # estimation location
-pol <-"PM25" # pollutant
-
 
 # Init calibration
 useBootstrap = calibration_params$useBootstrap
@@ -43,8 +33,6 @@ nBootstrapSamples = calibration_params$nBootstrapSamples  # Should be large... N
 referenceStationFractionAfterResampling = calibration_params$referenceStationFractionAfterResampling  # After resampling/bootstrapping
 if(!useBootstrap) nBootstrapSamples = 1  # Just one calculation in case of no bootstrapping
 
-# rje3 hadi !!  select_time_start=as.POSIXct("2022-01-10 00:00:00", origin="1970-01-01",tz="CET") # To be changed if necessary
-# rje3 hadi !!  select_time_end=as.POSIXct("2022-01-19 00:00:00", origin="1970-01-01",tz="CET")
 
 #####################################
 #            READ DATA              #          
@@ -56,7 +44,6 @@ load(file_LCS_df_all_clean_groups_outliers_Rda)
 sensData <- LCS_df_all_clean_groups_outliers
 
 
-# rje3 hadi !!  sensData <- sensData[which(sensData$datetime>=select_time_start & sensData$datetime<=select_time_end),]
 sensData$PM2.5[which(sensData$outliers=="outlier")]<-NA
 sensData=sensData[complete.cases(sensData$PM2.5),]
 sensData2=subset(sensData,select=-c(Typology,Clust,Season,Group,outliers,DayType,Periods))
@@ -121,8 +108,6 @@ nbr_hours
 #####################################
 # Run script
 source(choose.files(caption = "Select interpolate.R file"))
-# source(choose.files(caption = "uBss and uCi.R file"))
-#source("interpolate.R")
 
 sensData2 <- as.data.frame(sensData2)
 allreferenceData2 <- as.data.frame(allreferenceData2)
