@@ -1,13 +1,12 @@
 rm(list = ls())
 
+# Charger le fichier de configuration global
+setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity")
+source("00_paths_and_setting.R")
 
 ## List of packages to install
 Packages <- c("openair")
 do.call("library", as.list("openair"))
-
-# Set directory
-setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1")
-
 
 # Import libraries
 library(dplyr)
@@ -18,24 +17,13 @@ library(stats)
 library(RColorBrewer)
 library(stringr)
 library(sf) # Chargement de la bibliothèque pour la manipulation spatiale
-
-# Import libraries
-
 library(sp)
-library(RColorBrewer)
 library(fields)
 library(tidyr)
 
-
-
-# Directory paths
-indir   <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/"# path for input directory
-outdir  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/"# path for output directory
-outdir2  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/"# path for output directory
-
 # Load .Rda
-load(paste0(outdir,"LCS_df_all_clean_groups_outliers.Rda"))
-load(paste0(indir,"ref_df_all.Rda"))
+load(file_LCS_df_all_clean_groups_outliers_Rda)
+load(file_ref_df_all_rda)
 
 # # Convertir les data.tables en data.frames si nécessaire
 ref_df_all <- as.data.frame(ref_df_all)
@@ -49,14 +37,12 @@ head(LCS_df_all_clean)
 
 ##############""
 
-
 library(dplyr)
 ref_df_all <- ref_df_all %>% slice(-5825)
 
 # Identifier les stations de référence uniques
 stations <- unique(ref_df_all$ID) 
 print(stations)
-
 
 # Filtrer les données pour les capteurs colocalisés
 colocated_LCS_df_all_clean <- LCS_df_all_clean %>% 
@@ -65,21 +51,7 @@ colocated_LCS_df_all_clean <- LCS_df_all_clean %>%
 head(colocated_LCS_df_all_clean)
 unique(colocated_LCS_df_all_clean$Location.ID)
 
-save(colocated_LCS_df_all_clean, file = paste0(outdir, "df_correlations_timeplots_RefSensData_ALL/colocated_LCS_df_all_clean.Rda"))
-
-# Définir les stations de référence et leurs capteurs colocalisés
-stations_sensors <- list(
-  "ANT_REF_R801" = c("40499C", "4043B1"),
-  "ANT_REF_R802" = c("4049A6", "4043A7"),
-  "ANT_REF_R804" = c("40499F", "4043AE"),
-  "ANT_REF_R805" = c("4067B3"),
-  "ANT_REF_R811" = c("40642B"),
-  "ANT_REF_R817" = c("4047D7"),
-  "ANT_REF_M802" = c("4065EA"),
-  "ANT_REF_R803" = c("4067BD"),
-  "ANT_REF_AL01" = c("4065DA")
-)
-
+save(colocated_LCS_df_all_clean, file = file_colocated_LCS_df_all_clean_Rda)
 
 ref_df_all <- dplyr::rename(ref_df_all, date = datetime)
 
@@ -109,12 +81,10 @@ names(station_dfs) <- lapply(names(stations_sensors), function(station_id) {
 
 head(station_dfs[[1]])
 
-
-output_dir_RefSensData <- "C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL"
-if (!dir.exists(output_dir_RefSensData)) {
-  dir.create(output_dir_RefSensData, recursive = TRUE)
+# Créer le dossier s'il n'existe pas (normalement déjà créé par le fichier de configuration)
+if (!dir.exists(path_correlation_outputs)) {
+  dir.create(path_correlation_outputs, recursive = TRUE)
 }
-
 
 REF_R801_data <- station_dfs[[1]]
 REF_R802_data <- station_dfs[[2]]
@@ -126,36 +96,38 @@ REF_M802_data <- station_dfs[[7]]
 REF_R803_data <- station_dfs[[8]]
 REF_AL01_data <- station_dfs[[9]] 
 
-
-save(REF_R801_data, file = paste0(output_dir_RefSensData, "/REF_R801_data.Rda"))
-save(REF_R802_data, file = paste0(output_dir_RefSensData, "/REF_R802_data.Rda"))
-save(REF_R804_data, file = paste0(output_dir_RefSensData, "/REF_R804_data.Rda"))
-save(REF_R805_data, file = paste0(output_dir_RefSensData, "/REF_R805_data.Rda"))
-save(REF_R811_data, file = paste0(output_dir_RefSensData, "/REF_R811_data.Rda"))
-save(REF_R817_data, file = paste0(output_dir_RefSensData, "/REF_R817_data.Rda"))
-save(REF_M802_data, file = paste0(output_dir_RefSensData, "/REF_M802_data.Rda"))
-save(REF_R803_data, file = paste0(output_dir_RefSensData, "/REF_R803_data.Rda"))
-save(REF_AL01_data, file = paste0(output_dir_RefSensData, "/REF_AL01_data.Rda"))
-
+# Sauvegarder les dataframes dans les chemins définis dans le fichier de configuration
+base_path <- file.path(path_correlation_outputs)
+save(REF_R801_data, file = file.path(base_path, "REF_R801_data.Rda"))
+save(REF_R802_data, file = file.path(base_path, "REF_R802_data.Rda"))
+save(REF_R804_data, file = file.path(base_path, "REF_R804_data.Rda"))
+save(REF_R805_data, file = file.path(base_path, "REF_R805_data.Rda"))
+save(REF_R811_data, file = file.path(base_path, "REF_R811_data.Rda"))
+save(REF_R817_data, file = file.path(base_path, "REF_R817_data.Rda"))
+save(REF_M802_data, file = file.path(base_path, "REF_M802_data.Rda"))
+save(REF_R803_data, file = file.path(base_path, "REF_R803_data.Rda"))
+save(REF_AL01_data, file = file.path(base_path, "REF_AL01_data.Rda"))
 
 ## two R files with functions to source the SensorIneris_Toolbox.R, usually in the OneDrive - INERIS/SensorIneris/RScript folder
 source(choose.files(caption = "Select SensorIneris_Toolbox.R file"))
 source(choose.files(caption = "Select uBss and uCi.R file"))
 
+# Utilisation des paramètres de taille d'image définis dans le fichier de configuration
+WidthTimeplot <- figure_sizes$WidthTimeplot
+HeightTimeplot <- figure_sizes$HeightTimeplot
+WidthEtalonnage <- figure_sizes$WidthEtalonnage
+HeightEtalonnage <- figure_sizes$HeightEtalonnage
 
-## Define size of the output graphs
-WidthTimeplot <- 20
-HeightTimeplot <- 18
-WidthEtalonnage <- 20
-HeightEtalonnage <- 22
+# Créer les dossiers de sortie pour les corrélations et les séries temporelles
+corr_path <- file.path(path_correlation_outputs, "correlation_plots")
+timeseries_path <- file.path(path_correlation_outputs, "timeSeries_plots")
 
-path_corr <- "C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/correlation_plots"
-path_timeseries <- "C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/timeSeries_plots"
+if (!dir.exists(corr_path)) dir.create(corr_path, recursive = TRUE)
+if (!dir.exists(timeseries_path)) dir.create(timeseries_path, recursive = TRUE)
 
 ## replace NaN with NA in the subset database
 MyDataFrame <- data.frame()
 MyDataFrame[is.nan.data.frame(MyDataFrame)] <- NA
-
 
 plots_generator <- function(station_data, station_id, sensor_ids, path_corr, path_timeseries) {
   station_id_short <- gsub("_data$", "", station_id)
@@ -165,16 +137,16 @@ plots_generator <- function(station_data, station_id, sensor_ids, path_corr, pat
   # graphique de séries temporelles
   timePlot(
     mydata = station_data,
-    pollutant = c("PM2.5", paste0("PM2.5_", sensor_ids)), # "Ref.PM2.5", "PM2.5_40499C", "PM2.5_4043B1"
+    pollutant = c("PM2.5", paste0("PM2.5_", sensor_ids)),
     plot.type = "l",
     lwd = 1.5,
     group = FALSE,
     main = "",
     ylab = "",
-    name.pol = c(paste0("PM2.5_FIDAS200_", station_id_short), paste0("PM2.5_PMS5003_", sensor_ids)), # Nom affiché sur le graphique
+    name.pol = c(paste0("PM2.5_FIDAS200_", station_id_short), paste0("PM2.5_PMS5003_", sensor_ids)),
     auto.text = FALSE,
     date.format = "%d/%m",
-    cols = needed_colors, # Utiliser les couleurs dynamiques
+    cols = needed_colors,
     key = TRUE,
     key.columns = 2,
     key.position = "top",
@@ -235,23 +207,10 @@ plots_generator <- function(station_data, station_id, sensor_ids, path_corr, pat
   }
 }
 
-
-# Liste des stations et capteurs colocalisés
-stations_sensors_data_IDs <- list(
-  "REF_R801_data" = c("40499C", "4043B1"),
-  "REF_R802_data" = c("4049A6", "4043A7"),
-  "REF_R804_data" = c("40499F", "4043AE"),
-  "REF_R805_data" = c("4067B3"),
-  "REF_R811_data" = c("40642B"),
-  "REF_R817_data" = c("4047D7"),
-  "REF_M802_data" = c("4065EA"),
-  "REF_R803_data" = c("4067BD"),
-  "REF_AL01_data" = c("4065DA")
-)
-
 # Parcourir chaque station et générer les graphiques
-for (station_id in names(stations_sensors_data_IDs)) {
-  sensor_ids <- stations_sensors_data_IDs[[station_id]]
-  station_data <- get(station_id)
-  plots_generator(station_data, station_id, sensor_ids, path_corr, path_timeseries)
+for (station_id in names(stations_sensors)) {
+  sensor_ids <- stations_sensors[[station_id]]
+  station_data_id <- paste0("REF_", gsub("ANT_REF_", "", station_id), "_data")
+  station_data <- get(station_data_id)
+  plots_generator(station_data, station_data_id, sensor_ids, corr_path, timeseries_path)
 }

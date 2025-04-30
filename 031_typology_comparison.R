@@ -1,8 +1,8 @@
 rm(list = ls())
 
-# Set directory
-setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1")
-
+# Charger le fichier de configuration global
+setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity")
+source("00_paths_and_setting.R")
 
 # Import libraries
 library(dplyr)
@@ -13,25 +13,16 @@ library(stats)
 library(RColorBrewer)
 library(stringr)
 library(sf)
-library(raster)
-library(maptools)
 library(sp)
+library(raster)
 library(RColorBrewer)
+library(spam)
 library(fields)
-library(rgdal)
 library(tidyr)
-require(sp)
-require(rgdal)
 library(eurostat)
 
-
-# Directory paths
-indir   <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/"# path for input directory
-outdir  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/"# path for output directory
-outdir2  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/"# path for output directory
-outdir3 <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/outliers_detection TEST"
-
-metadata_sites <- fread(paste0(indir, "metadata/metadata_sites.csv"), fill=TRUE)
+# Chargement des métadonnées des sites
+metadata_sites <- fread(file_metadata_sites, fill=TRUE)
 metadata_sites <- as.data.frame(metadata_sites)
 
 unique(metadata_sites$location_id)
@@ -77,8 +68,8 @@ location_data <- convert_coords(location_data, "X", "Y")
 
 
 library(terra)
-legend_CLC <- read.csv(file=paste0(indir,"SIG_data/legend_CLC_V4.csv"), header=TRUE, sep=";",skip=0)
-CLC <- rast(file.path(indir, "SIG_data/CLC_Netherlands_NT.tif"))
+legend_CLC <- read.csv(file=file_CLC_legend_csv, header=TRUE, sep=";",skip=0)
+CLC <- rast(file_CLC_raster_tif)
 print(crs(CLC))
 
 e <- ext(-149435.2, 412450.6, -17499.31, 720698.7)
@@ -137,6 +128,5 @@ typo_comparison <- left_join(metadata_typo, location_typo, by = "Location.ID", s
 typo_comparison$Typology.CLC <- ifelse(is.na(typo_comparison$Typology.CLC), typo_comparison$Typology.sEURcity, typo_comparison$Typology.CLC)
 typo_comparison[typo_comparison$Location.ID == "ANT_REF_R802", "Typology.CLC"] <- "Traffic"
 
-dir.create("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/", recursive = TRUE)
-fwrite(typo_comparison, "C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/typo_CLC_BDD_comparison.csv")
-save(typo_comparison,file=paste0(outdir,"typo_CLC_BDD_comparison.Rda"))
+write.csv(typo_comparison, file_typo_CLC_BDD_comparison_csv)
+save(typo_comparison, file=file_typo_CLC_BDD_comparison_Rda)

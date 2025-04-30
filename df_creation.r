@@ -1,18 +1,19 @@
 rm(list = ls())
 
-# Set directory
-setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1")
+# Charger le fichier de configuration global
+setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity")
+source("00_paths_and_setting.R")
 
 # Charger les bibliothèques nécessaires
 library(data.table)
 library(openair)
 library(tidyverse)
 
-# Définition du répertoire contenant les fichiers CSV
-directory <- "C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/dataset" # Pour les capteurs PMS
+# Utiliser le répertoire défini dans le fichier de configuration
+dataset_directory <- path_dataset
 
 # Importation de fichiers de données 
-file_list <- list.files(path = directory, pattern = "*.csv", full.names = TRUE)
+file_list <- list.files(path = dataset_directory, pattern = "*.csv", full.names = TRUE)
 file_list <- file_list[!grepl("ANT_REF_R801_Fidas_UTC", file_list)]
 
 
@@ -34,65 +35,60 @@ end_date <- as.POSIXct("2021-02-16 01:00:00" , tz="UTC")
 # 
 # 
 # # Initialiser une liste pour stocker les data frames OPC
-# data_list <- list()
+data_list <- list()
+
+# colonne à garder
+columns_to_keep_OPCN3 <- c("date", "latitude", "longitude", "Location.ID", "OPCN3PM10" , "OPCN3PM25")
+
+# Boucle pour lire chaque fichier CSV de capteur, effectuer les modifications et stocker dans la liste
+for (file in file_list) {
+  
+  
+  # Lire le fichier CSV
+  data <- fread(file)
+  
+  
+  # Suppression des lignes en dehors de l'intervalle de temps d'intérêt
+  data[, date := as.POSIXct(date, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")]
+  data <- data[data$date >= start_date & data$date <= end_date, ]
+  
+  
+  # Suppression des colonnes non désirées (ajustez en fonction des colonnes qu'on veut garder)
+  data <- data[, ..columns_to_keep_OPCN3]
+  
+  
+  # Agrégation horaire des données
+  data_hourly <- timeAverage(data, avg.time = "hour", statistic = "mean", type = "Location.ID")
+  
+  
+  # Ajouter le data frame modifié à la liste
+  data_list[[basename(file)]] <- data_hourly
+  
+}
+
+
+print(data_list[[1]])
+# 
+# Fusionner tous les data frames en un seul
+LCS_df_all <- do.call(rbind, data_list)
+# 
+#créer la colonne ID en utilisant les rownames
+LCS_df_all$ID <- gsub("\\.csv.*", "", rownames(LCS_df_all))
+
+LCS_df_all <- LCS_df_all %>% filter(Location.ID != "")
+LCS_df_all$Location.ID <- as.character(LCS_df_all$Location.ID)
+LCS_df_all$Location.ID[LCS_df_all$Location.ID == "ANT_TRA_KIPD"] <- "ANT_URB_KIPD"
+
+unique(LCS_df_all$Location.ID)
+
+library(dplyr)
+
+LCS_df_all <- LCS_df_all %>%
+  select(ID, date, latitude, longitude, Location.ID, OPCN3PM10, OPCN3PM25)
 # 
 # 
-# # colonne à garder
-# columns_to_keep_OPCN3 <- c("date", "latitude", "longitude", "Location.ID", "OPCN3PM10" , "OPCN3PM25")
-# 
-# 
-# # Boucle pour lire chaque fichier CSV de capteur, effectuer les modifications et stocker dans la liste
-# for (file in file_list) {
-# 
-# 
-#   # Lire le fichier CSV
-#   data <- fread(file)
-# 
-# 
-#   # Suppression des lignes en dehors de l'intervalle de temps d'intérêt
-#   data[, date := as.POSIXct(date, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC")]
-#   data <- data[data$date >= start_date & data$date <= end_date, ]
-# 
-# 
-#   # Suppression des colonnes non désirées (ajustez en fonction des colonnes qu'on veut garder)
-#   data <- data[, ..columns_to_keep_OPCN3]
-# 
-# 
-#   # Agrégation horaire des données
-#   data_hourly <- timeAverage(data, avg.time = "hour", statistic = "mean", type = "Location.ID")
-# 
-# 
-#   # Ajouter le data frame modifié à la liste
-#   data_list[[basename(file)]] <- data_hourly
-# 
-# }
-# 
-# 
-# print(data_list[[1]])
-# 
-# # Fusionner tous les data frames en un seul
-# LCS_df_all <- do.call(rbind, data_list)
-# 
-# #créer la colonne ID en utilisant les rownames
-# LCS_df_all$ID <- gsub("\\.csv.*", "", rownames(LCS_df_all))
-# 
-# 
-# LCS_df_all <- LCS_df_all %>% filter(Location.ID != "")
-# LCS_df_all$Location.ID <- as.character(LCS_df_all$Location.ID)
-# LCS_df_all$Location.ID[LCS_df_all$Location.ID == "ANT_TRA_KIPD"] <- "ANT_URB_KIPD"
-# 
-# unique(LCS_df_all$Location.ID)
-# 
-# # Réorganisation des colonnes
-# #install.packages("dplyr")
-# library(dplyr)
-# 
-# LCS_df_all <- LCS_df_all %>%
-#   select(ID, date, latitude, longitude, Location.ID, OPCN3PM10, OPCN3PM25)
-# 
-# 
-# # Écrire le data frame fusionné dans un fichier CSV
-# fwrite(LCS_df_all, "C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/LCS_df_all.csv")
+# Écrire le data frame fusionné dans un fichier CSV
+fwrite(LCS_df_all, file_lcs_df_all_csv)
 
 # 
 #                                           
@@ -162,7 +158,7 @@ LCS_df_all[which(LCS_df_all$ID=="Antwerp_4043B1"),]$Location.ID <-"ANT_REF_R801"
 
 
 # Écrire le data frame fusionné dans un fichier CSV
-fwrite(LCS_df_all, "C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/LCS_df_all.csv")
+fwrite(LCS_df_all, file_lcs_df_all_csv)
 
 # # Vérification du nombre de capteurs et nombre de positions
 # nbr_locations <- length(unique(LCS_df_all$Location.ID))
@@ -230,7 +226,7 @@ rownames(ref_df_all) <- NULL
 
 
 # Écrire le data frame fusionné dans un fichier CSV
-fwrite(ref_df_all, "C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/ref_df_all.csv")
+fwrite(ref_df_all, file_ref_df_all_csv)
 
 nbr_sta <- length(unique(ref_df_all$Location.ID))
 

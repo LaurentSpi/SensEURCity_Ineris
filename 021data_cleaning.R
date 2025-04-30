@@ -1,9 +1,8 @@
 rm(list = ls())
 
-# Set directory
+# Charger le fichier de configuration global
 setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity")
-
-
+source("00_paths_and_setting.R")
 
 # Import libraries
 library(dplyr)
@@ -25,27 +24,12 @@ library(sf)
 #           INITIALIZATION          #          
 #####################################
 
-# Directory paths
-indir   <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/"# path for input directory
-outdir  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/"# path for output directory
-outdir2  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/"# path for output directory
+# Chargement des données
+ref_df_all <- fread(file_ref_df_all_csv)
+save(ref_df_all, file = file_ref_df_all_rda)
 
-# Init variables
-loc <-"Netherlands" # estimation location
-pol <-"PM25" # pollutant
-
-#####################################
-#            READ DATA              #          
-#####################################
-
-#load(paste0(indir,"LCS_df_all.csv")) # A unique file of sensor data for the whole period
-#load(paste0(indir,"ref_df_all.csv")) # A unique file of reference data for the whole period
-
-ref_df_all <- fread("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/ref_df_all.csv")
-save(ref_df_all, file = paste0(indir, "ref_df_all.Rda"))
-
-LCS_df_all1 <- fread(paste0(indir, "LCS_df_all.csv"))
-save(LCS_df_all1, file = paste0(indir, "LCS_df_all.Rda"))
+LCS_df_all1 <- fread(file_lcs_df_all_csv)
+save(LCS_df_all1, file = file_lcs_df_all_rda)
 LCS_df_all <- LCS_df_all1
 
 #renommage de colonne pour etre adapté au code d'Alicia 
@@ -96,18 +80,13 @@ LCS_df_all <- convert_coords(LCS_df_all, "X", "Y")
 LCS_df_all$X <- LCS_df_all$X.1
 LCS_df_all$Y <- LCS_df_all$Y.1
 
-# Sauvegarde des dataframes modifiés
-# write.csv(ref_df_all, paste0(indir, "ref_df_all.csv"), row.names = FALSE)
-# write.csv(LCS_df_all, paste0(indir, "LCS_df_all.csv"), row.names = FALSE)
-
-
 ### Reference data ###
 ref_df_all=ref_df_all[ref_df_all$PM2.5 > 0,] # Only keep positive values
 ID_ref=unique(ref_df_all$ID)
 ref_df_all<- na.omit(ref_df_all)
 
 # Typology
-station_typo <- read.csv(file=paste0(indir,"Stations_RIVM_LML_Feb2020_format_modif.csv"), header=TRUE, sep=";",skip=0)
+station_typo <- read.csv(file=file_station_typology, header=TRUE, sep=";",skip=0)
 colnames(station_typo)[1] <- "ID"
 names(station_typo)[names(station_typo) == "PM2.5"] <- "PM2.5_typo"
 names(station_typo)[names(station_typo) == "PM10"] <- "PM10_typo"
@@ -188,41 +167,6 @@ listSensorCalibrationGroups = list()
 vectorGroupIDs = c()
 allCloseSensors = c()
 iList = 1
-
-
-# for (iRef in 1:nbr_sta){
-#   #select all sensors within maxTolDistSensor from reference station. And sort by distance, starting close
-#   maxTolDistSensor = stadata2$Representativity_min[iRef]
-#   nb_valid_values = length(distancesSensorReference[iRef,][,distancesSensorReference[iRef,]<= maxTolDistSensor])
-#   if( nb_valid_values > 0){
-#     
-#     cat('maxTolDistSensor = ',maxTolDistSensor,'\n')
-#     cat('The Row',iRef,' contains  1 ( or more ) sensor.\n')
-#     
-#     row <- sapply(distancesSensorReference[iRef,][,distancesSensorReference[iRef,]<= maxTolDistSensor], as.numeric)
-#     closeSensors =  sort(row)
-#     
-#     referenceID = as.character(stadata2[iRef,]$ID)
-#     
-#     closeSensors = closeSensors[1:min(length(closeSensors),maxCountSensor)]
-#   
-#     
-#     #only create a group of sensors if more than minCountSensor sensors are available
-#     vectorGroupIDs[iList] = referenceID
-#     listSensorCalibrationGroups[[iList]] = list(referenceID, closeSensors)
-#     allCloseSensors = c( allCloseSensors, names(closeSensors))
-#     iList = iList + 1
-#   
-#   }else{
-#     cat('maxTolDistSensor = ',maxTolDistSensor,'\n')
-#     cat('The Row ( ref station ) ',iRef,' contains no close sensors after the condition.\n')
-#   }
-#   
-#   
-# }
-
-
-
 
 for (iRef in 1:9){
   #select all sensors within maxTolDistSensor from reference station. And sort by distance, starting close
@@ -310,23 +254,6 @@ for (isens in 1:nbr_sensor){
           l1=i-count-1
           l2=l1+count
           isensdata2[l1:l2,4]<-NA
-          
-          # png(paste0(outdir2,isens,"_sensor_trace.png"),width=1200, height=400)
-          # print(P <- ggplot(isensdata2,aes(x=datetime,y=PM2.5,fill=ID)) + geom_line(aes(color=ID),size=0.7) +
-          # labs(title="",y=bquote(PM2.5 ~ (mu*g/m^3)),x="") +
-          # theme_bw()+
-          # theme_minimal()+
-          # theme(plot.title = element_text(size=18),
-          #     axis.text=element_text(size=18),
-          #     axis.title=element_text(size=18),
-          #     legend.text = element_text(size =18),
-          #     legend.title = element_blank(),
-          #     legend.spacing.x = unit(0.3, 'cm'),
-          #     legend.position= "top")
-          # )
-          # P
-          # dev.off()  
-          
         }  
         count=0
       }
@@ -355,50 +282,6 @@ print("#4) Eliminate sensor with positive constant bias")
 count=0
 ID_2_REMOVE_all<-c()
 
-##################### TEST
-
-# count=count+1
-# 
-# print(count)
-# 
-# listItem <- listSensorCalibrationGroups[[3]]
-# 
-# referenceID = listItem[[1]][1]
-# referenceSet = stadata
-# referenceSubSet = referenceSet[which(referenceSet$ID==referenceID),]
-# 
-# # Select sensor ID's in Group
-# df_sensors = as.data.frame(listItem[[2]])
-# sensorIDs = rownames(df_sensors)
-# sensdataSubSet<-c()
-# # for (nsensor in 1:length(sensorIDs)){
-# #   sensdataSubSetTmp = allsensdata2[which(allsensdata2$ID==sensorIDs[nsensor]),]
-# #   sensdataSubSetTmp$Dist = rep(df_sensors[,nsensor],length(sensdataSubSetTmp[,1]))
-# #   sensdataSubSet = rbind(sensdataSubSet,sensdataSubSetTmp)
-# #    
-# # }
-# 
-# # Initialisez une liste pour collecter les data frames temporaires
-# sensdataSubSetList <- list()
-# 
-# for (nsensor in 1:length(sensorIDs)) {
-#   sensdataSubSetTmp = allsensdata2[which(allsensdata2$ID == sensorIDs[nsensor]), ]
-#   sensdataSubSetTmp$Dist = rep(df_sensors[nsensor, ], length(sensdataSubSetTmp[, 1]))
-#   # Ajoutez le data frame temporaire à la liste
-#   sensdataSubSetList[[length(sensdataSubSetList) + 1]] <- sensdataSubSetTmp
-# }
-# 
-# # Après la boucle, combinez tous les data frames de la liste en un seul
-# sensdataSubSet <- rbindlist(sensdataSubSetList, fill = TRUE)
-
-
-
-
-
-
-#####################
-
-
 #Loop on Ref stations with sensor group
 for(listItem in listSensorCalibrationGroups){
   
@@ -414,12 +297,6 @@ for(listItem in listSensorCalibrationGroups){
   df_sensors = as.data.frame(listItem[[2]])
   sensorIDs = rownames(df_sensors)
   sensdataSubSet<-c()
-  # for (nsensor in 1:length(sensorIDs)){
-  #   sensdataSubSetTmp = allsensdata2[which(allsensdata2$ID==sensorIDs[nsensor]),]
-  #   sensdataSubSetTmp$Dist = rep(df_sensors[,nsensor],length(sensdataSubSetTmp[,1]))
-  #   sensdataSubSet = rbind(sensdataSubSet,sensdataSubSetTmp)
-  #    
-  # }
   
   # Initialisez une liste pour collecter les data frames temporaires
   sensdataSubSetList <- list()
@@ -511,18 +388,18 @@ dataout <- allsensdata2[!(allsensdata2$ID %in% ID_2_REMOVE_all),]
 #####################################
 #            SAVE DATA              #          
 #####################################
-write.csv(ref_df_all, paste0(indir, "ref_df_all.csv"), row.names = FALSE)
-save(ref_df_all, file = paste0(indir, "ref_df_all.Rda"))
-save(dataout,file=paste0(outdir,"LCS_df_all_clean.Rda"))
+write.csv(ref_df_all, file_ref_df_all_csv, row.names = FALSE)
+save(ref_df_all, file = file_ref_df_all_rda)
+save(dataout, file = file_LCS_df_all_clean_Rda)
 
 #####################################
 #           DATA STATS              #          
 #####################################
 
 df<-dataout
-png(filename=paste0(outdir2,"02_Distribution_PM25_conc_clean.png"), width=600, height=600, type="cairo",bg = "white")
+png(filename=file.path(path_figures_general, "02_Distribution_PM25_conc_clean.png"), width=600, height=600, type="cairo",bg = "white")
 p1 <- ggplot(df, aes(x=PM2.5)) + geom_histogram(color="#333333",fill="#333333",alpha=0.5) +
-  labs(title="",x=bquote(.(pol) ~ (mu*g/m^3)), y = "Frequency")+
+  labs(title="",x=bquote(.(pollutant_name) ~ (mu*g/m^3)), y = "Frequency")+
   theme_bw()+
   theme_minimal()+
   theme(plot.title = element_text(size=24),

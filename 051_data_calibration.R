@@ -1,11 +1,8 @@
 rm(list = ls())
 
-# Set directory
-setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1")
-
-# install.packages("sf")
-# install.packages("tidyverse")
-
+# Charger le fichier de configuration global
+setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity")
+source("00_paths_and_setting.R")
 
 # Import libraries
 library(tidyverse)
@@ -26,14 +23,14 @@ library(chron)
 #           INITIALIZATION          #          
 #####################################
 
-shapefile <- st_read("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/gadm41_BEL_2.shp")
+shapefile <- st_read(file_shapefile_belgium)
 st_crs(shapefile) <- "EPSG:4326"
 
 # Directory paths
-indir   <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/"# path for input directory
-outdir  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/"# path for output directory
-outdir2  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/"# path for output directory
-outdir3 <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/outliers_detection"
+# indir   <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/"# path for input directory
+# outdir  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/"# path for output directory
+# outdir2  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/"# path for output directory
+# outdir3 <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/outliers_detection"
 
 # Init variables
 loc <-"Antwerp" # estimation location
@@ -41,10 +38,10 @@ pol <-"PM25" # pollutant
 
 
 # Init calibration
-useBootstrap = T
-nBootstrapSamples = 100 # should be large... Not used if useBootstrap = FALSE
-referenceStationFractionAfterResampling = 0.8 # After resampling/bootstrapping
-if(!useBootstrap) nBootstrapSamples = 1 # Just one calculation in case of no bootstrapping
+useBootstrap = calibration_params$useBootstrap
+nBootstrapSamples = calibration_params$nBootstrapSamples  # Should be large... Not used if useBootstrap = FALSE
+referenceStationFractionAfterResampling = calibration_params$referenceStationFractionAfterResampling  # After resampling/bootstrapping
+if(!useBootstrap) nBootstrapSamples = 1  # Just one calculation in case of no bootstrapping
 
 # rje3 hadi !!  select_time_start=as.POSIXct("2022-01-10 00:00:00", origin="1970-01-01",tz="CET") # To be changed if necessary
 # rje3 hadi !!  select_time_end=as.POSIXct("2022-01-19 00:00:00", origin="1970-01-01",tz="CET")
@@ -55,7 +52,7 @@ if(!useBootstrap) nBootstrapSamples = 1 # Just one calculation in case of no boo
 print("READ REF AND SENSOR DATA")
 
 # Load .Rda
-load(paste0(outdir,"LCS_df_all_clean_groups_outliers.Rda"))
+load(file_LCS_df_all_clean_groups_outliers_Rda)
 sensData <- LCS_df_all_clean_groups_outliers
 
 
@@ -66,7 +63,7 @@ sensData2=subset(sensData,select=-c(Typology,Clust,Season,Group,outliers,DayType
 sensData2$ID=as.character(sensData2$ID)
 
 
-load(paste0(indir,"ref_df_all.Rda"))
+load(file_ref_df_all_rda)
 allreferenceData1=ref_df_all
 
 # allreferenceData1 <- allreferenceData1 %>%
@@ -81,7 +78,7 @@ allreferenceData1=ref_df_all
 allreferenceData1=subset(allreferenceData1,select=-c(PM10))
 
 
-load(paste0(outdir,"typo_CLC_BDD_comparison.Rda"))
+load(file_typo_CLC_BDD_comparison_Rda)
 allreferenceData <- allreferenceData1
 
 
@@ -492,20 +489,14 @@ for (ntimes in 0:nbr_hours) {
         )
         print(' ICI 3 ')
         
-        fileOutName = paste0(outdir,
-                             "outliers_calibrationFactors_nBootStrap_",
-                             nBootstrapSamples)
-        fileOutName2 = paste0(outdir2,
-                              "outliers_calibrationFactors_nBootStrap_",
-                              nBootstrapSamples)
-        fileOutNameSensor = paste0(outdir,
-                                   "outliers_calibrationFactors_nBootStrap_",
-                                   nBootstrapSamples)
+        fileOutName = file.path(path_outputs_general, paste0("calibrationFactors_alltime_nmax", maxCountSensor, "_distmaxRepmax_outliers"))
+        fileOutName2 = file.path(path_figures_general, paste0("calibrationFactors_alltime_nmax", maxCountSensor, "_distmaxRepmax_outliers"))
+        fileOutNameSensor = file.path(path_outputs_general, paste0("calibratedSensors_alltime_nmax", maxCountSensor, "_distmaxRepmax_outliers"))
         
       } else {
-        fileOutName = paste0(outdir, "calibrationFactors")
-        fileOutName2 = paste0(outdir2, "calibrationFactors")
-        fileOutNameSensor = paste0(outdir, "calibratedSensors")
+        fileOutName = file.path(path_outputs_general, "calibrationFactors")
+        fileOutName2 = file.path(path_figures_general, "calibrationFactors")
+        fileOutNameSensor = file.path(path_outputs_general, "calibratedSensors")
         
       }
       
@@ -645,18 +636,14 @@ for (ntimes in 0:nbr_hours) {
 
 write.csv(
   calibrationFactorsAlltime,
-  paste0(fileOutName, "_alltime_nmax1000_distmaxRepmax_outliers.csv"),
+  file_calibrationFactorsAlltime_csv,
   row.names = F
 )
 write.csv(
   calibratedSensorsAlltime,
-  paste0(
-    fileOutNameSensor,
-    "_alltime_nmax1000_distmaxRepmax_outliers.csv"
-  ),
+  file_calibratedSensorsAlltime_csv,
   row.names = F
 )
 
-
-save(calibratedSensorsAlltime,file=paste0(outdir,"calibratedSensorsAlltime.Rda"))
+save(calibratedSensorsAlltime, file = file_calibratedSensorsAlltime_Rda)
 

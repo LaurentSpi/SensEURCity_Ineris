@@ -1,8 +1,8 @@
 rm(list = ls())
 
-# Set directory
-setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1")
-
+# Charger le fichier de configuration global
+setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity")
+source("00_paths_and_setting.R")
 
 # Import libraries
 library(dplyr)
@@ -14,27 +14,13 @@ library(RColorBrewer)
 library(stringr)
 library(sf)
 library(raster)
-library(maptools)
 library(fields)
-library(rgdal)
 library(tidyr)
 require(sp)
 library(leaflet)
 library(gridExtra)
 library(mapview)
 library(fastcluster)
-
-# Directory paths
-indir   <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/"# path for input directory
-outdir  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/"# path for output directory
-outdir2  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/"# path for output directory
-outdir3 <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/outliers_detection TEST"
-
-# Init variables
-loc <-"Antwerp" # estimation location
-pol <-"PM2.5" # pollutant
-
-
 
 #####################################
 #           LOAD SIG DATA           #          
@@ -67,9 +53,9 @@ CRS_BELG <- CRS("+init=epsg:32631")
 print("READ REF AND SENSOR DATA")
 
 # Load .Rda
-load(paste0(outdir,"LCS_df_all_clean.Rda"))
-load("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/ref_df_all.Rda")
-load(paste0(outdir,"typo_CLC_BDD_comparison.Rda"))
+load(file_LCS_df_all_clean_Rda)
+load(file_ref_df_all_rda)
+load(file_typo_CLC_BDD_comparison_Rda)
 
 ### Reference data ###
 ref_df_all <- ref_df_all %>% rename(Location.ID = ID)
@@ -90,13 +76,13 @@ print("START ASSIGN TYPOLOGY")
 #ref
 ref_df_all_wtypo <- left_join(ref_df_all, typo_comparison[, c("Location.ID", "Typology.sEURcity")], by = "Location.ID")
 names(ref_df_all_wtypo)[names(ref_df_all_wtypo) == "Typology.sEURcity"] <- "Typology"
-save(ref_df_all_wtypo,file=paste0(outdir,"ref_df_all_wtypo.Rda"))
+save(ref_df_all_wtypo, file = file_ref_df_all_wtypo_Rda)
 
 
 #sens
 dataout_wtypo <- left_join(dataout, typo_comparison[, c("Location.ID", "Typology.sEURcity")], by = "Location.ID")
 names(dataout_wtypo)[names(dataout_wtypo) == "Typology.sEURcity"] <- "Typology"
-save(dataout_wtypo,file=paste0(outdir,"LCS_df_all_clean_wtypo.Rda"))
+save(dataout_wtypo, file = file_LCS_df_all_clean_wtypo_Rda)
 
 
 stadata <- ref_df_all_wtypo
@@ -127,7 +113,7 @@ typology_sens <- sensdata %>%
   dplyr::distinct(ID, Location.ID, Typology)
 
 typology_sens[which(typology_sens$Location.ID=="ANT_URB_KIPD"),3]<-"URB"
-save(typology_sens,file=paste0(outdir,"typology_sens.Rda"))
+save(typology_sens, file = file_typology_sens_Rda)
 sensdata2 <- left_join(sensdata2, typology_sens, by = c("ID", "Location.ID"))
 
 
@@ -182,7 +168,7 @@ m_typo <- leaflet() %>%
              position = "bottomright")
 
 m_typo
-mapshot(m_typo, file = paste0(outdir2, "/03Map_Antwerp_Sensors_v2.png"))
+mapshot(m_typo, file = file.path(path_figures_general, "03Map_Antwerp_Sensors_v2.png"))
 
 
 # carte
@@ -195,7 +181,7 @@ m_category <- leaflet(spsensdata3_sf) %>%
   addLegend("bottomright", pal = pal, values = ~Category, title = "Sensor Category")
 
 m_category
-mapshot(m_category, file = paste0(outdir2, "/03Map_Antwerp_Sensors_Category.png"))
+mapshot(m_category, file = file.path(path_figures_general, "03Map_Antwerp_Sensors_Category.png"))
 
 
 # # Check typology assignment / reference station
@@ -326,7 +312,7 @@ m_cluster <- leaflet(spsensdata2clust_sf) %>%
   addLegend("bottomright", pal = pal_cluster, values = ~Clust, title = "SensorClusters")
 
 m_cluster
-mapshot(m_cluster, file = paste0(outdir2, "03Map_Antwerp_Sensor_Clusters.png"))
+mapshot(m_cluster, file = file.path(path_figures_general, "03Map_Antwerp_Sensor_Clusters.png"))
 
 
 ###############
@@ -413,37 +399,6 @@ sensdataff <- sensdataff[!is.infinite(sensdataff$PM2.5) & !is.na(sensdataff$PM2.
 
 summary(sensdataff)
 
-#boxplot limité aux valeurs inférieur à 30 
-
-# # Boxplot pour 'Season'
-# P1 <- ggplot(sensdataff, aes(x = Typology, y = PM2.5, color = Season)) +
-#   geom_boxplot() +
-#   ylim(0, 30) +
-#   labs(y = "PM2.5 (µg/m³)") +
-#   scale_color_manual(values = c("Winter" = "#0000CC", "Spring" = "#66CC00", "Summer" = "#FFCC33", "Fall" = "#CC0000")) +
-#   theme_minimal()
-# 
-# # Boxplot pour 'DayType'
-# P2 <- ggplot(sensdataff, aes(x = Typology, y = PM2.5, color = DayType)) +
-#   geom_boxplot() +
-#   ylim(0, 30) +
-#   labs(y = "PM2.5 (µg/m³)") +
-#   scale_color_manual(values = c("Weekday" = "#0000CC", "Weekend" = "#66CC00")) +
-#   theme_minimal()
-# 
-# # Boxplot pour 'Periods'
-# P3 <- ggplot(sensdataff, aes(x = Typology, y = PM2.5, color = Periods)) +
-#   geom_boxplot() +
-#   ylim(0, 30) +
-#   labs(y = "PM2.5 (µg/m³)") +
-#   scale_color_manual(values = c("Night hours" = "#0000CC", "Off-peak hours" = "#66CC00", "Traffic hours" = "#FFCC33", "Transition periods" = "#CC0000")) +
-#   theme_minimal()
-# 
-# # Combine les graphiques en un seul output
-# png(filename = paste0(outdir2, "03_", loc, "_sensors_boxplots_typo_season_day_hour_final_v2.png"), width = 800, height = 700)
-# grid.arrange(P1, P2, P3, ncol = 1)
-# dev.off()
-
 # Boxplot pour 'Season'
 P1 <- ggplot(sensdataff, aes(x = Typology, y = PM2.5, color = Season)) +
   geom_boxplot() +
@@ -465,7 +420,7 @@ P3 <- ggplot(sensdataff, aes(x = Typology, y = PM2.5, color = Periods)) +
   scale_color_manual(values = c("Night hours" = "#0000CC", "Off-peak hours" = "#66CC00", "Traffic hours" = "#FFCC33", "Transition periods" = "#CC0000")) +
   theme_minimal()
 
-png(filename = paste0(outdir2, "03_", loc, "_sensors_boxplots_typo_season_day_hour_final_v3.png"), width = 800, height = 700)
+png(filename = file.path(path_figures_general, paste0("03_", location_name, "_sensors_boxplots_typo_season_day_hour_final_v3.png")), width = 800, height = 700)
 grid.arrange(P1, P2, P3, ncol = 1)
 dev.off()
 
@@ -499,7 +454,7 @@ P6 <- ggplot(sensdataff, aes(x = Typology, y = PM2.5, color = Periods)) +
   theme_minimal()
 
 
-png(filename = paste0(outdir2, "03_", loc, "_boxplots_logScale_typo_season_day_hour.png"), 
+png(filename = file.path(path_figures_general, paste0("03_", location_name, "_boxplots_logScale_typo_season_day_hour.png")), 
     width = 800, height = 700)
 gridExtra::grid.arrange(P4, P5, P6, ncol = 1)
 dev.off()
@@ -543,4 +498,4 @@ stat_group = aggregate(. ~ Group, tmp, function(x) sum(x, na.rm=TRUE), na.action
 #            SAVE DATA              #          
 #####################################
 LCS_df_all_clean_groups <- sensdataff
-save(LCS_df_all_clean_groups,file=paste0(outdir,"LCS_df_all_clean_groups.Rda"))
+save(LCS_df_all_clean_groups, file = file_LCS_df_all_clean_groups_Rda)

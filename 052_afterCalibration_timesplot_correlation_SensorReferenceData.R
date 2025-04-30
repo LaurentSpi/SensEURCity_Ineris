@@ -1,14 +1,12 @@
 rm(list = ls())
 
+# Charger le fichier de configuration global
+setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity")
+source("00_paths_and_setting.R")
 
 ## List of packages to install
 Packages <- c("openair")
 do.call("library", as.list("openair"))
-
-
-# Set directory
-setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1")
-
 
 # Import libraries
 library(dplyr)
@@ -23,25 +21,13 @@ library(RColorBrewer)
 library(fields)
 library(tidyr)
 
-# Directory paths
-indir   <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/"# path for input directory
-outdir  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/"# path for output directory
-outdir2  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/"# path for output directory
-
-
 # Load .Rda
-load(paste0(outdir,"calibratedSensorsAlltime.Rda"))
-load(paste0(indir,"ref_df_all.Rda"))
-load(paste0(outdir,"typology_sens.Rda"))
+load(file_calibratedSensorsAlltime_Rda)
+load(file_ref_df_all_rda)
+load(file_typology_sens_Rda)
 
 LocID <- typology_sens
 LocID <- LocID[ , -3]
-
-
-# # Convertir les data.tables en data.frames si nécessaire
-# ref_df_all <- as.data.frame(ref_df_all)
-# calibratedSensorsAlltime <- as.data.frame(dataout)
-
 
 head(ref_df_all)
 head(calibratedSensorsAlltime)
@@ -76,24 +62,9 @@ colocated_calibratedSensorsAlltime <- colocated_calibratedSensorsAlltime %>%
 
 colocated_calibratedSensorsAlltime <- merge(colocated_calibratedSensorsAlltime, LocID, by = "ID", all.x = TRUE)
 
-save(colocated_calibratedSensorsAlltime,file=paste0(outdir,"colocated_calibratedSensorsAlltime"))
-
-
-# Définir les stations de référence et leurs capteurs colocalisés
-stations_sensors <- list(
-  "ANT_REF_R801" = c("40499C", "4043B1"),
-  "ANT_REF_R802" = c("4049A6", "4043A7"),
-  "ANT_REF_R804" = c("40499F", "4043AE"),
-  "ANT_REF_R805" = c("4067B3"),
-  "ANT_REF_R811" = c("40642B"),
-  "ANT_REF_R817" = c("4047D7"),
-  "ANT_REF_M802" = c("4065EA"),
-  "ANT_REF_R803" = c("4067BD"),
-  "ANT_REF_AL01" = c("4065DA")
-)
+save(colocated_calibratedSensorsAlltime, file=file_colocated_calibratedSensorsAlltime_Rda)
 
 ref_df_all <- ref_df_all %>% rename(date = datetime)
-
 
 # dataframe pour une station de référence
 create_station_df <- function(station_id, sensor_ids, ref_df, cap_df) {
@@ -113,26 +84,16 @@ station_dfs <- lapply(names(stations_sensors), function(station_id) {
   create_station_df(station_id, stations_sensors[[station_id]], ref_df_all, colocated_calibratedSensorsAlltime)
 })
 
-
 names(station_dfs) <- lapply(names(stations_sensors), function(station_id) {
   paste0("REF_", gsub("ANT_REF_", "", station_id), "_data")
 })
 
 head(station_dfs[[1]])
 
-
-output_dir_RefSensData <- "C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration"
-if (!dir.exists(output_dir_RefSensData)) {
-  dir.create(output_dir_RefSensData, recursive = TRUE)
+# Créer le dossier s'il n'existe pas (normalement déjà créé par le fichier de configuration)
+if (!dir.exists(path_correlation_after_calibration)) {
+  dir.create(path_correlation_after_calibration, recursive = TRUE)
 }
-
-
-# # Sauvegarder les dataframes
-# for (i in seq_along(station_dfs)) {
-#   station_name <- names(station_dfs)[i]
-#   save(station_dfs[[i]], file = paste0(output_dir_RefSensData, "/", station_name, ".Rda"))
-# }
-
 
 REF_R801_data <- station_dfs[[1]]
 REF_R802_data <- station_dfs[[2]]
@@ -144,181 +105,30 @@ REF_M802_data <- station_dfs[[7]]
 REF_R803_data <- station_dfs[[8]]
 REF_AL01_data <- station_dfs[[9]] 
 
-
-save(REF_R801_data, file = paste0(output_dir_RefSensData, "/REF_R801_data.Rda"))
-save(REF_R802_data, file = paste0(output_dir_RefSensData, "/REF_R802_data.Rda"))
-save(REF_R804_data, file = paste0(output_dir_RefSensData, "/REF_R804_data.Rda"))
-save(REF_R805_data, file = paste0(output_dir_RefSensData, "/REF_R805_data.Rda"))
-save(REF_R811_data, file = paste0(output_dir_RefSensData, "/REF_R811_data.Rda"))
-save(REF_R817_data, file = paste0(output_dir_RefSensData, "/REF_R817_data.Rda"))
-save(REF_M802_data, file = paste0(output_dir_RefSensData, "/REF_M802_data.Rda"))
-save(REF_R803_data, file = paste0(output_dir_RefSensData, "/REF_R803_data.Rda"))
-save(REF_AL01_data, file = paste0(output_dir_RefSensData, "/REF_AL01_data.Rda"))
-
+# Sauvegarder les dataframes dans les chemins définis dans le fichier de configuration
+save(REF_R801_data, file = files_ref_sensor_data_list$REF_R801_data)
+save(REF_R802_data, file = files_ref_sensor_data_list$REF_R802_data)
+save(REF_R804_data, file = files_ref_sensor_data_list$REF_R804_data)
+save(REF_R805_data, file = files_ref_sensor_data_list$REF_R805_data)
+save(REF_R811_data, file = files_ref_sensor_data_list$REF_R811_data)
+save(REF_R817_data, file = files_ref_sensor_data_list$REF_R817_data)
+save(REF_M802_data, file = files_ref_sensor_data_list$REF_M802_data)
+save(REF_R803_data, file = files_ref_sensor_data_list$REF_R803_data)
+save(REF_AL01_data, file = files_ref_sensor_data_list$REF_AL01_data)
 
 ## two R files with functions to source the SensorIneris_Toolbox.R, usually in the OneDrive - INERIS/SensorIneris/RScript folder
 source(choose.files(caption = "Select SensorIneris_Toolbox.R file"))
 source(choose.files(caption = "Select uBss and uCi.R file"))
 
-
-## Define size of the output graphs
-WidthTimeplot <- 20
-HeightTimeplot <- 18
-WidthEtalonnage <- 20
-HeightEtalonnage <- 22
-
-
-
-
-path_corr <- "C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration/correlation_plots"
-path_timeseries <- "C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration/timeSeries_plots"
-
 ## replace NaN with NA in the subset database
 MyDataFrame <- c()
 MyDataFrame[is.nan.data.frame(MyDataFrame)] <- NA
 
-
-# 
-#                                 #############
-#                                 # timeplot  #
-#                                 #############
-# 
-# 
-# timePlot(mydata = REF_R801_data #Directly pass the dataframe to the function
-#          , pollutant = c("Ref.PM2.5","PM2.5_40499C", "PM2.5_4043B1") #c(,) list containing the reference in first line then the sensors
-#          , plot.type = "l"
-#          , lwd = 1.5
-#          , group = FALSE
-#          , main = ""
-#          , ylab = ""
-#          , name.pol = c("Ref.PM2.5","PM2.5_40499C", "PM2.5_4043B1") #Name to be print on the plot, can be different from the variable ReferenceAndSensors
-#          , auto.text = FALSE
-#          , date.format = "%d/%m" #define in line 28-33
-#          , cols = c("red","black","blue") #define in line 20-26
-#          , key = TRUE
-#          , key.columns = 2
-#          , key.position = "top"
-#          , y.relation = "free")
-# 
-# dev.copy(png, filename = file.path(path_timeseries, paste0("Time series REF_R801 40499C-4043B1 .png"))
-#          , units = "cm", res = 1024, width = WidthTimeplot, height = HeightTimeplot)
-# dev.off()
-# 
-# 
-# 
-#
-# 
-#                                             ######################## 
-#                                             #   Correlation plots  #
-#                                             ########################
-# 
-# 
-# # Correlation REF_R801-40499C
-# 
-# 
-# Limit.XY <- Etalonnage(x = REF_R801_data[, "Ref.PM2.5"] #point to the reference data column
-#                        , s_x = NULL
-#                        , y = REF_R801_data[, "PM2.5_40499C"]  #point to the sensor data column
-#                        , s_y = NULL
-#                        , AxisLabelX = "PM2.5_FIDAS200_R801" #Name to be print on the X axis, can be different from the variable name
-#                        , AxisLabelY = "PM2.5_PMS5003_40499C" #Name to be print on the Y axis, can be different from the variable name
-#                        , Title = ""
-#                        , Marker = 19
-#                        , Couleur = "blue"
-#                        , ligne = "p" 
-#                        , XY_same = FALSE 
-#                        , lim = NULL # ? 
-#                        , steps = c(10, 10) 
-#                        , digitround = NULL
-#                        , marges = NULL
-#                        , PlotAxis = "s"
-#                        , OrdonneeOrigine = NULL)
-# 
-# ## Add the X=Y line to ease the comparison between graphs
-# lines(x= c(min(Limit.XY),max(Limit.XY)), y=c(min(Limit.XY),max(Limit.XY)), type = "l", col = "green4")
-# mtext(paste0("Line Y=X "),line=-36.3,adj=1,padj=0,col= "green4",cex=1.2)
-# 
-# Cal_Line(x = REF_R801_data[, "Ref.PM2.5"] #point to the reference data column
-#          , s_x = NULL
-#          , y = REF_R801_data[, "PM2.5_40499C"] #point to the sensor data column
-#          , s_y = NULL
-#          , Mod_type = "Linear"
-#          , Matrice = NULL
-#          , line_position = -1.3
-#          , Couleur = "red"
-#          , Sensor_name = NULL
-#          , f_coef1 = "%.2f"
-#          , f_coef2 = "%.2f"
-#          , f_R2 = "%.3f"
-#          , lim = Limit.XY #Output from the Etalonnage function lines 66-82
-#          , marges = NULL
-#          , Covariates = NULL
-#          , Equation = "RMSE")
-# 
-# dev.copy(png, filename = file.path(path_corr, paste0(" Correlation REF_R801-40499C.png"))
-#          , units = "cm", res = 1024, width = WidthEtalonnage, height = HeightEtalonnage)
-# dev.off()
-# 
-# 
-#                                           
-# 
-# 
-# # Correlation REF_R801-4043B1
-# 
-# Limit.XY <- Etalonnage(x = REF_R801_data[, "Ref.PM2.5"] #point to the reference data column
-#                        , s_x = NULL
-#                        , y = REF_R801_data[, "PM2.5_4043B1"]  #point to the sensor data column
-#                        , s_y = NULL
-#                        , AxisLabelX = "PM2.5_FIDAS200_R801" #Name to be print on the X axis, can be different from the variable name
-#                        , AxisLabelY = "PM2.5_PMS5003_4043B1" #Name to be print on the Y axis, can be different from the variable name
-#                        , Title = ""
-#                        , Marker = 19
-#                        , Couleur = "blue"
-#                        , ligne = "p" 
-#                        , XY_same = FALSE 
-#                        , lim = NULL # ? 
-#                        , steps = c(10, 10) 
-#                        , digitround = NULL
-#                        , marges = NULL
-#                        , PlotAxis = "s"
-#                        , OrdonneeOrigine = NULL)
-# 
-# ## Add the X=Y line to ease the comparison between graphs
-# lines(x= c(min(Limit.XY),max(Limit.XY)), y=c(min(Limit.XY),max(Limit.XY)), type = "l", col = "green4")
-# mtext(paste0("Line Y=X "),line=-36.3,adj=1,padj=0,col= "green4",cex=1.2)
-# 
-# Cal_Line(x = REF_R801_data[, "Ref.PM2.5"] #point to the reference data column
-#          , s_x = NULL
-#          , y = REF_R801_data[, "PM2.5_4043B1"] #point to the sensor data column
-#          , s_y = NULL
-#          , Mod_type = "Linear"
-#          , Matrice = NULL
-#          , line_position = -1.3
-#          , Couleur = "red"
-#          , Sensor_name = NULL
-#          , f_coef1 = "%.2f"
-#          , f_coef2 = "%.2f"
-#          , f_R2 = "%.3f"
-#          , lim = Limit.XY #Output from the Etalonnage function lines 66-82
-#          , marges = NULL
-#          , Covariates = NULL
-#          , Equation = "RMSE")
-# 
-# dev.copy(png, filename = file.path(path_corr, paste0(" Correlation REF_R801-4043B1.png"))
-#          , units = "cm", res = 1024, width = WidthEtalonnage, height = HeightEtalonnage)
-# dev.off()
-# 
-
-
-load("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration/REF_R801_data.Rda")
-load("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration/REF_R802_data.Rda")
-load("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration/REF_R804_data.Rda")
-load("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration/REF_R805_data.Rda")
-load("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration/REF_R811_data.Rda")
-load("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration/REF_R817_data.Rda")
-load("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration/REF_M802_data.Rda")
-load("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration/REF_R803_data.Rda")
-load("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/df_correlations_timeplots_RefSensData_ALL/after_calibration/REF_AL01_data.Rda")
+# Utilisation des paramètres de taille d'image définis dans le fichier de configuration
+WidthTimeplot <- figure_sizes$WidthTimeplot
+HeightTimeplot <- figure_sizes$HeightTimeplot
+WidthEtalonnage <- figure_sizes$WidthEtalonnage
+HeightEtalonnage <- figure_sizes$HeightEtalonnage
 
 plots_generator <- function(station_data, station_id, sensor_ids, path_corr, path_timeseries) {
   station_id_short <- gsub("_data$", "", station_id)
@@ -328,16 +138,16 @@ plots_generator <- function(station_data, station_id, sensor_ids, path_corr, pat
   # graphique de séries temporelles
   timePlot(
     mydata = station_data,
-    pollutant = c("PM2.5", paste0("PM2.5_", sensor_ids)), # "Ref.PM2.5", "PM2.5_40499C", "PM2.5_4043B1"
+    pollutant = c("PM2.5", paste0("PM2.5_", sensor_ids)), 
     plot.type = "l",
     lwd = 1.5,
     group = FALSE,
     main = "",
     ylab = "",
-    name.pol = c(paste0("PM2.5_FIDAS200_", station_id_short), paste0("PM2.5_PMS5003_", sensor_ids)), # Nom affiché sur le graphique
+    name.pol = c(paste0("PM2.5_FIDAS200_", station_id_short), paste0("PM2.5_PMS5003_", sensor_ids)), 
     auto.text = FALSE,
     date.format = "%d/%m",
-    cols = needed_colors, # Utiliser les couleurs dynamiques
+    cols = needed_colors, 
     key = TRUE,
     key.columns = 2,
     key.position = "top",
@@ -398,26 +208,12 @@ plots_generator <- function(station_data, station_id, sensor_ids, path_corr, pat
   }
 }
 
-
-# Liste des stations et capteurs colocalisés
-stations_sensors_data_IDs <- list(
-  "REF_R801_data" = c("40499C", "4043B1"),
-  "REF_R802_data" = c("4049A6", "4043A7"),
-  "REF_R804_data" = c("40499F", "4043AE"),
-  "REF_R805_data" = c("4067B3"),
-  "REF_R811_data" = c("40642B"),
-  "REF_R817_data" = c("4047D7"),
-  "REF_M802_data" = c("4065EA"),
-  "REF_R803_data" = c("4067BD"),
-  "REF_AL01_data" = c("4065DA")
-)
-
-
 # Parcourir chaque station et générer les graphiques
-for (station_id in names(stations_sensors_data_IDs)) {
-  sensor_ids <- stations_sensors_data_IDs[[station_id]]
-  station_data <- get(station_id)
-  plots_generator(station_data, station_id, sensor_ids, path_corr, path_timeseries)
+for (station_id in names(stations_sensors)) {
+  sensor_ids <- stations_sensors[[station_id]]
+  station_data_id <- paste0("REF_", gsub("ANT_REF_", "", station_id), "_data")
+  station_data <- get(station_data_id)
+  plots_generator(station_data, station_data_id, sensor_ids, path_correlation_plots, path_timeseries_plots)
 }
 
 

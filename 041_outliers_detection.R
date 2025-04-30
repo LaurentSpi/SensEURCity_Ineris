@@ -1,7 +1,8 @@
 rm(list = ls())
 
-# Set directory
-setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1")
+# Charger le fichier de configuration global
+setwd("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity")
+source("00_paths_and_setting.R")
 
 # Import libraries
 library(raster)
@@ -12,6 +13,7 @@ library(ggplot2)
 library(dplyr)
 library(data.table)
 library(chron)
+library(Rcpp)
 library(optimization)
 library(pracma)
 
@@ -23,25 +25,12 @@ library(pracma)
 #################################################################################
 
 #####################################
-#           INITIALIZATION          #          
-#####################################
-
-# Directory paths
-indir   <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/INPUTS/"# path for input directory
-outdir  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/"# path for output directory
-outdir2  <-"C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/"# path for output directory
-
-# Init variables
-loc <-"Antwerp" # estimation location
-pol <-"PM25" # pollutant
-
-#####################################
 #            READ DATA              #          
 #####################################
 print("READ REF AND SENSOR DATA")
 
 # Load .Rda
-load(paste0(outdir,"LCS_df_all_clean_groups.Rda"))
+load(file_LCS_df_all_clean_groups_Rda)
 
 #####################################
 #        OUTLIERS DETECTION         #          
@@ -159,11 +148,11 @@ for (i in 1:nbr_groups){ # Loop over groups
     df$outliers=as.factor(df$outliers)
     
     # Plot	
-    png(filename=paste0("C:/Users/diallo/OneDrive - INERIS/Documents/Ineris1/ALT_SensEURCity/OUTPUTS/figs/outliers_detection/","_04_Outliers_",Group,".png"), width=1000, height=600, type="cairo",bg = "white")
+    png(filename=file.path(path_figures_outliers, paste0("_04_Outliers_",Group,".png")), width=1000, height=600, type="cairo",bg = "white")
     p4 <- ggplot(df, aes(x=datetime,y=PM25)) + geom_point(aes(color=outliers)) +
       #xlim(c(0, 15))+#ylim(c(0, 3e6))+
       scale_color_manual(values=c("black", "red"))+
-      labs(title=paste0(Group,": ",df_group),x="",y=bquote(.(pol) ~ (mu*g/m^3)))+
+      labs(title=paste0(Group,": ",df_group),x="",y=bquote(.(pollutant_name) ~ (mu*g/m^3)))+
       theme_bw()+
       theme_minimal()+
       theme(plot.title = element_text(size=24),
@@ -194,7 +183,7 @@ for (i in 1:nbr_groups){ # Loop over groups
 #            SAVE DATA              #          
 #####################################
 LCS_df_all_clean_groups_outliers <- dataout
-save(LCS_df_all_clean_groups_outliers,file=paste0(outdir,"LCS_df_all_clean_groups_outliers.Rda"))
+save(LCS_df_all_clean_groups_outliers, file = file_LCS_df_all_clean_groups_outliers_Rda)
 
 #####################################
 #            CHECK PLOT             #          
