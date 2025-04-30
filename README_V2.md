@@ -16,7 +16,7 @@ Ce dépôt contient une suite de scripts R implémentant la méthodologie décri
 
 ## Prérequis
 
-Pour exécuter ces scripts, vous aurez besoin de :
+Pour exécuter ces scripts (que vous trouverez dans Code R), vous aurez besoin de :
 
 - R (version 4.0 ou supérieure)
 - RStudio (recommandé pour une utilisation plus facile)
