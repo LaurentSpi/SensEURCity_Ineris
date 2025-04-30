@@ -16,7 +16,7 @@ Ce dépôt contient une suite de scripts R implémentant la méthodologie décri
 
 ## Prérequis
 
-Pour exécuter ces scripts (que vous trouverez dans Code R), vous aurez besoin de :
+Pour exécuter ces scripts, vous aurez besoin de :
 
 - R (version 4.0 ou supérieure)
 - RStudio (recommandé pour une utilisation plus facile)
@@ -40,7 +40,7 @@ install.packages(c("dplyr", "data.table", "tidyverse", "ggplot2", "RColorBrewer"
                    "optimization", "pracma", "leaflet", "mapview"))
 ```
 
-3. Vous devrez également disposer de deux scripts externes :
+3. Vous devrez également disposer de trois scripts externes (que vous trouverez dans le dossier Code R) :
    - `SensorIneris_Toolbox.R`
    - `uBss and uCi.R`
    - `interpolate.R` (pour la calibration)
