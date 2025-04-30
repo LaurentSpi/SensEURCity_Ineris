@@ -107,14 +107,15 @@ Pour un traitement complet des données, exécutez les scripts dans l'ordre suiv
 ## Description détaillée des scripts
 
 ### 1. `00_paths_and_setting.R`
-**Rôle :** Centralise tous les chemins et paramètres pour le projet.\\
+**Rôle :** Centralise tous les chemins et paramètres pour le projet.\
+
 **Fonctionnalités :**
 - Définit les chemins vers tous les répertoires et fichiers
 - Configure les paramètres communs comme le nom du polluant et les paramètres de calibration
 - Crée automatiquement les répertoires nécessaires
 
 ### 2. `df_creation.r`
-**Rôle :** Création des dataframes initiaux à partir des données brutes.\\
+**Rôle :** Création des dataframes initiaux à partir des données brutes.\
 **Fonctionnalités :**
 - Importe les fichiers CSV des capteurs depuis le répertoire `dataset`
 - Effectue une agrégation horaire des données
@@ -122,7 +123,7 @@ Pour un traitement complet des données, exécutez les scripts dans l'ordre suiv
 - Gère trois types de données : OPC, PMS et REF (référence)
 
 ### 3. `021data_cleaning.R`
-**Rôle :** Nettoyage initial des données capteurs.\\
+**Rôle :** Nettoyage initial des données capteurs.\
 **Fonctionnalités :**
 - Supprime les valeurs négatives
 - Élimine les valeurs supérieures à un seuil basé sur les stations de référence
@@ -132,7 +133,7 @@ Pour un traitement complet des données, exécutez les scripts dans l'ordre suiv
 - Génère un histogramme de distribution des concentrations de PM2.5
 
 ### 4. `031_typology_comparison.R`
-**Rôle :** Comparaison des classifications typologiques.\\
+**Rôle :** Comparaison des classifications typologiques.\
 **Fonctionnalités :**
 - Charge les métadonnées des sites et extrait les informations typologiques
 - Convertit les coordonnées dans un système de projection adapté
@@ -141,7 +142,7 @@ Pour un traitement complet des données, exécutez les scripts dans l'ordre suiv
 - Sauvegarde les résultats dans `typo_CLC_BDD_comparison.Rda/csv`
 
 ### 5. `032_data_classification.R`
-**Rôle :** Classification détaillée des capteurs.\\
+**Rôle :** Classification détaillée des capteurs.\
 **Fonctionnalités :**
 - Attribue une typologie (URB, TRA, INDUS) à chaque capteur
 - Ajoute des informations temporelles (saisons, périodes de la journée)
@@ -152,7 +153,7 @@ Pour un traitement complet des données, exécutez les scripts dans l'ordre suiv
 - Sauvegarde les données classifiées dans `LCS_df_all_clean_groups.Rda`
 
 ### 6. `041_outliers_detection.R`
-**Rôle :** Détection statistique des valeurs aberrantes.\\
+**Rôle :** Détection statistique des valeurs aberrantes.\
 **Fonctionnalités :**
 - Traite séparément chaque groupe de capteurs
 - Applique une transformation en racine carrée pour stabiliser la variance
@@ -162,7 +163,7 @@ Pour un traitement complet des données, exécutez les scripts dans l'ordre suiv
 - Sauvegarde les données annotées dans `LCS_df_all_clean_groups_outliers.Rda`
 
 ### 7. `042_timesplot_correlation_SensorReferenceData.R`
-**Rôle :** Génération de graphiques avant calibration.\\
+**Rôle :** Génération de graphiques avant calibration.\
 **Fonctionnalités :**
 - Crée des séries temporelles comparant les capteurs aux stations de référence
 - Génère des graphiques de corrélation entre capteurs et stations de référence
@@ -171,7 +172,7 @@ Pour un traitement complet des données, exécutez les scripts dans l'ordre suiv
 - Sauvegarde les données colocalisées dans `colocated_LCS_df_all_clean.Rda`
 
 ### 8. `051_data_calibration.R`
-**Rôle :** Calibration des données capteurs.\\
+**Rôle :** Calibration des données capteurs.\
 **Fonctionnalités :**
 - Forme des groupes de capteurs autour des stations de référence
 - Calcule les facteurs de calibration horaires basés sur la méthodologie RIVM et uBss
@@ -181,7 +182,7 @@ Pour un traitement complet des données, exécutez les scripts dans l'ordre suiv
 - Sauvegarde les facteurs de calibration dans `calibrationFactorsAlltime_alltime_nmax1000_distmaxRepmax_outliers.csv`
 
 ### 9. `052_afterCalibration_timesplot_correlation_SensorReferenceData.R`
-**Rôle :** Génération de graphiques après calibration.\\
+**Rôle :** Génération de graphiques après calibration.\
 **Fonctionnalités :**
 - Crée des séries temporelles comparant les capteurs calibrés aux stations de référence
 - Génère des graphiques de corrélation après calibration
