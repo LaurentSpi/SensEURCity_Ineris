@@ -17,7 +17,6 @@ library(Rcpp)
 library(optimization)
 library(pracma)
 
-
 #################################################################################
 #                               OUTLIERS DETECTION                              #
 #                      Created 30/08/2021 & updated 16/05/2022                  #

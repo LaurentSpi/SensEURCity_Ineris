@@ -40,8 +40,8 @@ if(!useBootstrap) nBootstrapSamples = 1  # Just one calculation in case of no bo
 print("READ REF AND SENSOR DATA")
 
 # Load .Rda
-load(file_LCS_df_all_clean_groups_outliers_Rda)
-sensData <- LCS_df_all_clean_groups_outliers
+load(file_LCS_df_all_clean_groups_outliers_Rda3)
+sensData <- LCS_df_all_clean_groups_outliers3
 
 
 sensData$PM2.5[which(sensData$outliers=="outlier")]<-NA
@@ -225,7 +225,7 @@ for (ntimes in 0:nbr_hours) {
         NoCloseSensors <- colnames(distancesSensorReference)[valid_indices]
         
         # Exclusion capteurs colocalisés
-        NoCloseSensors <- NoCloseSensors[!NoCloseSensors %in% CloseSensors]
+        NoCloseSensors <- NoCloseSensors[!NoCloseSensors %in% CloseSensors] 
         
         # Limitation du nombre de capteurs
         NoCloseSensors <- intersect(NoCloseSensors[1:min(length(NoCloseSensors), maxCountSensor)], nsensData$ID)

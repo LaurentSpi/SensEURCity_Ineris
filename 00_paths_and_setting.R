@@ -23,8 +23,18 @@ path_figures_outliers_test <- file.path(path_figures_general, "outliers_detectio
 # Specific output paths
 path_correlation_outputs <- file.path(path_outputs_general, "df_correlations_timeplots_RefSensData_ALL/")
 path_correlation_after_calibration <- file.path(path_correlation_outputs, "after_calibration/")
+
 path_correlation_plots <- file.path(path_correlation_after_calibration, "correlation_plots/")
 path_timeseries_plots <- file.path(path_correlation_after_calibration, "timeSeries_plots/")
+
+path_correlation_plots2 <- file.path(path_correlation_after_calibration, "correlation_plots2/")
+path_timeseries_plots2 <- file.path(path_correlation_after_calibration, "timeSeries_plots2/")
+
+path_correlation_plots3 <- file.path(path_correlation_after_calibration, "correlation_plots3/")
+path_timeseries_plots3 <- file.path(path_correlation_after_calibration, "timeSeries_plots3/")
+
+path_correlation_plots4 <- file.path(path_correlation_after_calibration, "correlation_plots_LOF/")
+path_timeseries_plots4 <- file.path(path_correlation_after_calibration, "timeSeries_plots_LOF/")
 
 # Dataset directory for raw data files
 path_dataset <- file.path(path_project_root, "dataset/")
@@ -44,6 +54,9 @@ file_shapefile_belgium       <- file.path(path_inputs_general, "gadm41_BEL_2.shp
 file_lcs_df_all_csv          <- file.path(path_inputs_general, "LCS_df_all.csv")
 file_lcs_df_all_rda          <- file.path(path_inputs_general, "LCS_df_all.Rda")
 
+file_lcs_df_all_csv_OPC      <- file.path(path_inputs_general, "LCS_df_all_OPC.csv")
+file_lcs_df_all_rda_OPC      <- file.path(path_inputs_general, "LCS_df_all_OPC.Rda")
+
 # OUTPUT FILES (GENERATED)
 file_LCS_df_all_clean_Rda         <- file.path(path_outputs_general, "LCS_df_all_clean.Rda")
 file_typo_CLC_BDD_comparison_Rda  <- file.path(path_outputs_general, "typo_CLC_BDD_comparison.Rda")
@@ -52,10 +65,42 @@ file_ref_df_all_wtypo_Rda         <- file.path(path_outputs_general, "ref_df_all
 file_LCS_df_all_clean_wtypo_Rda   <- file.path(path_outputs_general, "LCS_df_all_clean_wtypo.Rda")
 file_typology_sens_Rda            <- file.path(path_outputs_general, "typology_sens.Rda")
 file_LCS_df_all_clean_groups_Rda  <- file.path(path_outputs_general, "LCS_df_all_clean_groups.Rda")
+
 file_LCS_df_all_clean_groups_outliers_Rda <- file.path(path_outputs_general, "LCS_df_all_clean_groups_outliers.Rda")
+file_LCS_df_all_clean_groups_outliers_Rda2 <- file.path(path_outputs_general, "LCS_df_all_clean_groups_outliers2.Rda")
+file_LCS_df_all_clean_groups_outliers_Rda3 <- file.path(path_outputs_general, "LCS_df_all_clean_groups_outliers3.Rda")
+
+
+file_LCS_df_all_clean_Rda_OPC         <- file.path(path_outputs_general, "LCS_df_all_clean_OPC.Rda")
+file_ref_df_all_wtypo_Rda_OPC         <- file.path(path_outputs_general, "ref_df_all_wtypo_OPC.Rda")
+file_LCS_df_all_clean_wtypo_Rda_OPC   <- file.path(path_outputs_general, "LCS_df_all_clean_wtypo_OPC.Rda")
+file_typology_sens_Rda_OPC            <- file.path(path_outputs_general, "typology_sens_OPC.Rda")
+file_LCS_df_all_clean_groups_Rda_OPC  <- file.path(path_outputs_general, "LCS_df_all_clean_groups_OPC.Rda")
+
+
+file_LCS_df_all_clean_groups_outliers_Rda_OPC <- file.path(path_outputs_general, "LCS_df_all_clean_groups_outliers_OPC.Rda")
+file_LCS_df_all_clean_groups_outliers_Rda2_OPC <- file.path(path_outputs_general, "LCS_df_all_clean_groups_outliers2_OPC.Rda")
+file_LCS_df_all_clean_groups_outliers_Rda3_OPC <- file.path(path_outputs_general, "LCS_df_all_clean_groups_outliers3_OPC.Rda")
+
+
 file_calibratedSensorsAlltime_Rda <- file.path(path_outputs_general, "calibratedSensorsAlltime.Rda")
 file_calibrationFactorsAlltime_csv <- file.path(path_outputs_general, "calibrationFactorsAlltime_alltime_nmax1000_distmaxRepmax_outliers.csv")
 file_calibratedSensorsAlltime_csv  <- file.path(path_outputs_general, "calibratedSensorsAlltime_alltime_nmax1000_distmaxRepmax_outliers.csv")
+
+file_calibratedSensorsAlltime_Rda2 <- file.path(path_outputs_general, "calibratedSensorsAlltime.Rda")
+file_calibrationFactorsAlltime_csv2 <- file.path(path_outputs_general, "calibrationFactorsAlltime_alltime_nmax1000_distmaxRepmax_outliers.csv")
+file_calibratedSensorsAlltime_csv2  <- file.path(path_outputs_general, "calibratedSensorsAlltime_alltime_nmax1000_distmaxRepmax_outliers.csv")
+
+file_calibratedSensorsAlltime_Rda3 <- file.path(path_outputs_general, "calibratedSensorsAlltime.Rda")
+file_calibrationFactorsAlltime_csv3 <- file.path(path_outputs_general, "calibrationFactorsAlltime_alltime_nmax1000_distmaxRepmax_outliers.csv")
+file_calibratedSensorsAlltime_csv3 <- file.path(path_outputs_general, "calibratedSensorsAlltime_alltime_nmax1000_distmaxRepmax_outliers.csv")
+
+
+file_calibratedSensorsAlltime_Rda_LOF <- file.path(path_outputs_general, "calibratedSensorsAlltime.Rda")
+file_calibrationFactorsAlltime_csv_LOF <- file.path(path_outputs_general, "calibrationFactorsAlltime_alltime_nmax1000_distmaxRepmax_outliers.csv")
+file_calibratedSensorsAlltime_csv_LOF <- file.path(path_outputs_general, "calibratedSensorsAlltime_alltime_nmax1000_distmaxRepmax_outliers.csv")
+
+
 file_colocated_calibratedSensorsAlltime_Rda <- file.path(path_outputs_general, "colocated_calibratedSensorsAlltime.Rda")
 file_colocated_LCS_df_all_clean_Rda <- file.path(path_correlation_outputs, "colocated_LCS_df_all_clean.Rda")
 

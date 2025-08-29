@@ -9,6 +9,7 @@ library(data.table)
 library(openair)
 library(tidyverse)
 
+
 # Utiliser le répertoire défini dans le fichier de configuration
 dataset_directory <- path_dataset
 
@@ -68,27 +69,34 @@ for (file in file_list) {
 
 
 print(data_list[[1]])
-# 
+
 # Fusionner tous les data frames en un seul
-LCS_df_all <- do.call(rbind, data_list)
-# 
+LCS_df_all_OPC <- do.call(rbind, data_list)
+
+
 #créer la colonne ID en utilisant les rownames
-LCS_df_all$ID <- gsub("\\.csv.*", "", rownames(LCS_df_all))
+LCS_df_all_OPC$ID <- gsub("\\.csv.*", "", rownames(LCS_df_all_OPC))
 
-LCS_df_all <- LCS_df_all %>% filter(Location.ID != "")
-LCS_df_all$Location.ID <- as.character(LCS_df_all$Location.ID)
-LCS_df_all$Location.ID[LCS_df_all$Location.ID == "ANT_TRA_KIPD"] <- "ANT_URB_KIPD"
+LCS_df_all_OPC <- LCS_df_all_OPC %>% filter(Location.ID != "")
+LCS_df_all_OPC$Location.ID <- as.character(LCS_df_all_OPC$Location.ID)
+LCS_df_all_OPC$Location.ID[LCS_df_all_OPC$Location.ID == "ANT_TRA_KIPD"] <- "ANT_URB_KIPD"
 
-unique(LCS_df_all$Location.ID)
+unique(LCS_df_all_OPC$Location.ID)
 
-library(dplyr)
+LCS_df_all_OPC <- dplyr::select(LCS_df_all_OPC, ID, date,
+                  latitude, longitude, Location.ID, OPCN3PM10, OPCN3PM25)
 
-LCS_df_all <- LCS_df_all %>%
-  select(ID, date, latitude, longitude, Location.ID, OPCN3PM10, OPCN3PM25)
-# 
+LCS_df_all_OPC <- LCS_df_all_OPC %>%
+  rename(
+    X = longitude,
+    Y = latitude,
+    datetime = date,
+    PM2.5 = OPCN3PM25,
+    PM10 = OPCN3PM10
+  )
 # 
 # Écrire le data frame fusionné dans un fichier CSV
-fwrite(LCS_df_all, file_lcs_df_all_csv)
+fwrite(LCS_df_all_OPC, file_lcs_df_all_csv_OPC)
 
 # 
 #                                           
@@ -143,9 +151,9 @@ LCS_df_all <- LCS_df_all %>% filter(Location.ID != "")
 LCS_df_all$Location.ID <- as.character(LCS_df_all$Location.ID)
 LCS_df_all$Location.ID[LCS_df_all$Location.ID == "ANT_TRA_KIPD"] <- "ANT_URB_KIPD"
 
+LCS_df_all <- dplyr::select(LCS_df_all, ID, date, latitude, longitude,
+                            Location.ID, "5310CAT", "5325CAT")
 
-LCS_df_all <- LCS_df_all %>%
-  select(ID, date, latitude, longitude, Location.ID, "5310CAT", "5325CAT")
 
 names(LCS_df_all)[names(LCS_df_all) == "5310CAT"] <- "PMS_PM10"
 names(LCS_df_all)[names(LCS_df_all) == "5325CAT"] <- "PMS_PM25"
@@ -156,6 +164,14 @@ LCS_df_all[which(LCS_df_all$ID=="Antwerp_4049A6"),]$Location.ID <-"ANT_REF_R802"
 LCS_df_all[which(LCS_df_all$ID=="Antwerp_408168"),]$Location.ID <-"ANT_URB_PARK"
 LCS_df_all[which(LCS_df_all$ID=="Antwerp_4043B1"),]$Location.ID <-"ANT_REF_R801"
 
+LCS_df_all <- LCS_df_all %>%
+  rename(
+    X = longitude,
+    Y = latitude,
+    datetime = date,
+    PM2.5 = PMS_PM25,
+    PM10 = PMS_PM10
+  )
 
 # Écrire le data frame fusionné dans un fichier CSV
 fwrite(LCS_df_all, file_lcs_df_all_csv)
@@ -224,11 +240,21 @@ print(ref_df_all)
 
 rownames(ref_df_all) <- NULL
 
+ref_df_all <- ref_df_all %>%
+  rename(
+    X = Ref.Long,
+    Y = Ref.Lat,
+    datetime = date,
+    ID = Location.ID,
+    PM2.5 = Ref.PM2.5,
+    PM10 = Ref.PM10
+  )
+
 
 # Écrire le data frame fusionné dans un fichier CSV
 fwrite(ref_df_all, file_ref_df_all_csv)
 
-nbr_sta <- length(unique(ref_df_all$Location.ID))
+nbr_sta <- length(unique(ref_df_all$ID))
 
 print(paste("Nombre de station de référence:", nbr_sta))
 

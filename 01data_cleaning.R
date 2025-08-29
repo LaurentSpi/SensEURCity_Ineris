@@ -34,26 +34,6 @@ LCS_df_all <- LCS_df_all1
 
 #renommage de colonne pour etre adapté au code d'Alicia 
 ref_df_all <- as.data.frame(ref_df_all)
-ref_df_all <- ref_df_all %>%
-  rename(
-    X = Ref.Long,
-    Y = Ref.Lat,
-    datetime = date,
-    ID = Location.ID,
-    PM2.5 = Ref.PM2.5,
-    PM10 = Ref.PM10
-  )
-
-
-LCS_df_all <- as.data.frame(LCS_df_all)
-LCS_df_all <- LCS_df_all %>%
-  rename(
-    X = longitude,
-    Y = latitude,
-    datetime = date,
-    PM2.5 = PMS_PM25,
-    PM10 = PMS_PM10
-  )
 
 LCS_df_all <- as.data.frame(LCS_df_all)
 
@@ -168,35 +148,52 @@ vectorGroupIDs = c()
 allCloseSensors = c()
 iList = 1
 
-for (iRef in 1:9){
-  #select all sensors within maxTolDistSensor from reference station. And sort by distance, starting close
-  maxTolDistSensor = stadata2$Representativity_min[iRef]
-  nrvalid=length(distancesSensorReference[iRef,][,distancesSensorReference[iRef,]<= maxTolDistSensor])
-  if(nrvalid> 0){
+# boucle sur toutes les références présentes
+for (iRef in seq_len(nrow(stadata2))) {
+  
+  # seuil distance (représentativité)
+  maxTolDistSensor <- stadata2$Representativity_min[iRef]
+  
+  # valeurs de distance pour la référence iRef (vecteur numérique)
+  row_vals <- as.numeric(distancesSensorReference[iRef, , drop = TRUE])
+  col_ids  <- colnames(distancesSensorReference)     # IDs capteurs (colonnes)
+  
+  # capteurs dans le rayon de tolérance
+  idx_in   <- !is.na(row_vals) & (row_vals <= maxTolDistSensor)
+  nrvalid  <- sum(idx_in)
+  
+  if (nrvalid > 0) {
+    # trier par distance croissante
+    ord <- order(row_vals[idx_in])
+    closeSensors_vals <- row_vals[idx_in][ord]
+    closeSensors_ids  <- col_ids[idx_in][ord]
     
-    row <- sapply(distancesSensorReference[iRef,][,distancesSensorReference[iRef,]<= maxTolDistSensor], as.numeric)
-    closeSensors =  sort(row)
-    closeSensors
-    if(nrvalid==1){
-      row2 <- sapply(distancesSensorReference[iRef,][,distancesSensorReference[iRef,]<= 5000], as.numeric)
-      closeSensors =  sort(row2)
-      closeSensors = closeSensors[1]
+    # cas limite : s’il n’y a qu’un seul capteur, fallback à 5000 m pour en avoir au moins 1 sûr
+    if (nrvalid == 1) {
+      idx_fallback <- !is.na(row_vals) & (row_vals <= 5000)
+      if (any(idx_fallback)) {
+        ord2 <- order(row_vals[idx_fallback])
+        closeSensors_vals <- row_vals[idx_fallback][ord2][1]
+        closeSensors_ids  <- col_ids[idx_fallback][ord2][1]
+      }
     }
     
-    referenceID = as.character(stadata2[iRef,]$ID)
-    #select a maximum of maxCountSensor sensors
+    # borner au maxCountSensor
+    keep_n <- min(length(closeSensors_vals), maxCountSensor)
+    closeSensors_vals <- closeSensors_vals[seq_len(keep_n)]
+    closeSensors_ids  <- closeSensors_ids[seq_len(keep_n)]
     
-    closeSensors = closeSensors[1:min(length(closeSensors),maxCountSensor)]
+    # vecteur nommé: noms = IDs capteurs, valeurs = distances
+    closeSensors <- closeSensors_vals
+    names(closeSensors) <- closeSensors_ids
     
-    #only create a group of sensors if more than minCountSensor sensors are available
-    if (nrvalid >=  minCountSensor) {
-      vectorGroupIDs[iList] = referenceID
-      listSensorCalibrationGroups[[iList]] = list(referenceID,
-                                                  closeSensors)
-      allCloseSensors = c(allCloseSensors,
-                          names(closeSensors)
-      )
-      iList = iList + 1
+    # créer le groupe si assez de capteurs
+    if (length(closeSensors) >= minCountSensor) {
+      referenceID <- as.character(stadata2$ID[iRef])
+      vectorGroupIDs[iList] <- referenceID
+      listSensorCalibrationGroups[[iList]] <- list(referenceID, closeSensors)
+      allCloseSensors <- c(allCloseSensors, names(closeSensors))
+      iList <- iList + 1
     }
   }
 }
@@ -213,7 +210,7 @@ print(listSensorCalibrationGroups)
 
 #1) Eliminate negative values
 print("#1) Eliminate negative values")
-sensdata=sensdata[which(sensdata$PM2.5>=0),]
+sensdata=sensdata[which(sensdata$PM2.5>0),]
 
 #2) Eliminate values > threshold value based on max reference station value
 print("#2) Eliminate values > threshold value based on max reference station value")
@@ -272,7 +269,7 @@ for (isens in 1:nbr_sensor){
   } # if isensdata > 1
 } # end loop over sensors
 
-#allsensdata = na.omit(allsensdata)
+allsensdata = na.omit(sensdata)
 allsensdata2=allsensdata
 allsensdata2=allsensdata2[complete.cases(allsensdata2$PM2.5),]
 
@@ -396,9 +393,51 @@ save(dataout, file = file_LCS_df_all_clean_Rda)
 #           DATA STATS              #          
 #####################################
 
-df<-dataout
+# Avant nettoyage
+df1 <- LCS_df_all1
+
+# Retirer les valeurs manquantes, infinies ou non numériques
+df1 <- df1 %>%
+  dplyr::mutate(PM2.5 = as.numeric(PM2.5)) %>%   # Sécurise le type
+  dplyr::filter(!is.na(PM2.5) & is.finite(PM2.5))
+
+png(
+  filename = file.path(path_figures_general, "02_Distribution_PM25_conc.png"),
+  width = 600, height = 600, type = "cairo", bg = "white"
+)
+
+p1 <- ggplot(df1, aes(x = PM2.5)) +
+  geom_histogram(
+    color = "#333333",
+    fill = "#333333",
+    alpha = 0.5,
+    binwidth = 1    # <-- ajuste la largeur des classes ici
+  ) +
+  labs(
+    title = "",
+    x = bquote(.(pollutant_name) ~ (mu*g/m^3)),
+    y = "Frequency"
+  ) +
+  theme_bw() +
+  theme(
+    plot.title    = element_text(size = 24),
+    axis.text     = element_text(size = 24),
+    axis.title    = element_text(size = 24),
+    legend.text   = element_text(size = 24),
+    legend.title  = element_blank(),
+    legend.spacing.x = unit(0.3, 'cm'),
+    legend.position  = "top"
+  )
+
+print(p1)
+dev.off()
+
+
+
+# Après nettoyage
+df2<-dataout
 png(filename=file.path(path_figures_general, "02_Distribution_PM25_conc_clean.png"), width=600, height=600, type="cairo",bg = "white")
-p1 <- ggplot(df, aes(x=PM2.5)) + geom_histogram(color="#333333",fill="#333333",alpha=0.5) +
+p2 <- ggplot(df2, aes(x=PM2.5)) + geom_histogram(color="#333333",fill="#333333",alpha=0.5) +
   labs(title="",x=bquote(.(pollutant_name) ~ (mu*g/m^3)), y = "Frequency")+
   theme_bw()+
   theme_minimal()+
@@ -409,6 +448,6 @@ p1 <- ggplot(df, aes(x=PM2.5)) + geom_histogram(color="#333333",fill="#333333",a
         legend.title = element_blank(),
         legend.spacing.x = unit(0.3, 'cm'),
         legend.position= "top")
-p1
+p2
 dev.off()
 

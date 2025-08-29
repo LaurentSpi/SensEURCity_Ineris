@@ -329,8 +329,9 @@ stat_clust = aggregate(. ~ Clust, sensdata_wtypo_corr_cluster2, function(x) sum(
 stat_clust = subset(stat_clust,select=c(Clust,Count))
 clust2out = which(stat_clust$Count > 10)
 
-sensdataf2=merge(sensdata,sensdata_wtypo_corr_cluster,by=c("ID"))
-
+sensdata_wtypo_unique <- sensdata_wtypo_corr_cluster %>%
+  distinct(ID, .keep_all = TRUE)
+sensdataf2 <- merge(sensdata, sensdata_wtypo_unique, by = "ID")
 
 ######################################
 #          ASSIGN SEASON             #          
