@@ -1,4 +1,5 @@
 dataset
+OUTPUTS/**/*.png
 INPUTS1/metadata
 INPUTS1/SIG_data
 INPUTS1/ref_df_all.xlsx
