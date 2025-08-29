@@ -8,3 +8,9 @@ OUTPUTS/typo_CLC_BDD_comparison.xlsx
 OUTPUTS/typo_CLC_BDD_comparison.csv
 OUTPUTS/outliers_calibrationFactors_nBootStrap_100_alltime_nmax1000_distmaxRepmax_outliers.csv
 INPUTS1/ref_df_all.csv
+OUTPUTS/
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
